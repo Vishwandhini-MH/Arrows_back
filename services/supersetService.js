@@ -2,6 +2,10 @@ import axios from "axios";
 
 import { getSupersetConfig } from "../config/superset.js";
 
+const NGROK_SKIP_WARNING_HEADERS = {
+  "ngrok-skip-browser-warning": "true",
+};
+
 function createSupersetApi(supersetConfig) {
   return axios.create({
     baseURL: supersetConfig.baseUrl,
@@ -10,6 +14,7 @@ function createSupersetApi(supersetConfig) {
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
+      ...NGROK_SKIP_WARNING_HEADERS,
     },
   });
 }
