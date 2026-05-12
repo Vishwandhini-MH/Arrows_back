@@ -23,13 +23,15 @@ app.use(
   cors({
     origin(origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-        return;
+        return callback(null, true);
       }
 
-      callback(new Error(`CORS blocked for origin: ${origin}`));
+      const error = new Error(`CORS blocked origin: ${origin}`);
+      error.statusCode = 403;
+      error.expose = true;
+
+      return callback(error);
     },
-    credentials: true,
   }),
 );
 
@@ -46,11 +48,14 @@ app.use((req, res) => {
 });
 
 app.use((err, _req, res, _next) => {
-  console.error(err);
+  console.error({
+    message: err.message,
+    statusCode: err.statusCode || 500,
+  });
 
   res.status(err.statusCode || 500).json({
     message:
-      process.env.NODE_ENV === "production"
+      process.env.NODE_ENV === "production" && !err.expose
         ? "Internal server error"
         : err.message,
   });
